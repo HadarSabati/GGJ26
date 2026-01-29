@@ -2,62 +2,57 @@ using UnityEngine;
 
 public class HandController : MonoBehaviour
 {
-    // Assign the "Natives" layer in the Inspector
+    // Assign "Natives" layer in the Inspector
     public LayerMask targetLayer; 
-    
+    // Drag your "GrabPoint" child object here
+    public Transform grabPoint; 
+
     private Transform grabbedObject = null;
     private bool isHolding = false;
 
     void Update()
     {
-        // 1. Hand movement logic
         MoveHandWithMouse();
 
-        // 2. Interaction logic (Toggle Grab/Release)
         if (Input.GetMouseButtonDown(0))
         {
             if (isHolding)
-            {
                 ReleaseObject();
-            }
             else
-            {
                 TryGrabObject();
-            }
         }
 
-        // 3. Keep the object attached to the hand position while holding
-        if (isHolding && grabbedObject != null)
+        // Attach the object to the grab point while holding
+        if (isHolding && grabbedObject != null && grabPoint != null)
         {
-            grabbedObject.position = transform.position;
+            grabbedObject.position = grabPoint.position;
         }
     }
 
     void MoveHandWithMouse()
     {
-        Vector3 mousePos = Input.mousePosition;
-        // Adjust this value based on your camera distance
-        mousePos.z = 10f; 
-        transform.position = Camera.main.ScreenToWorldPoint(mousePos);
+        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        mousePos.z = 0; 
+        transform.position = mousePos;
     }
 
     void TryGrabObject()
     {
-        // Cast a ray from the camera to the mouse position
-        Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-        RaycastHit hit;
+        Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        RaycastHit2D hit = Physics2D.Raycast(mouseWorldPos, Vector2.zero, 0f, targetLayer);
 
-        // Check if the ray hits an object on the "Natives" layer
-        if (Physics.Raycast(ray, out hit, 100f, targetLayer))
+        if (hit.collider != null)
         {
+            Debug.Log("<color=cyan>Hand hit:</color> " + hit.collider.name);
+            
             grabbedObject = hit.transform;
             isHolding = true;
             
-            // Disable physics influence while carrying the object
-            Rigidbody rb = grabbedObject.GetComponent<Rigidbody>();
+            Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                rb.isKinematic = true;
+                rb.bodyType = RigidbodyType2D.Kinematic; 
+                rb.linearVelocity = Vector2.zero; 
             }
         }
     }
@@ -66,11 +61,16 @@ public class HandController : MonoBehaviour
     {
         if (grabbedObject != null)
         {
-            // Re-enable physics so the object can fall
-            Rigidbody rb = grabbedObject.GetComponent<Rigidbody>();
+            Debug.Log("<color=yellow>Hand released:</color> " + grabbedObject.name);
+            
+            Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
-                rb.isKinematic = false;
+                rb.bodyType = RigidbodyType2D.Dynamic;
+                
+                // Change Gravity Scale upon release
+                // Set this value to whatever you need (e.g., 1f for normal, 2f for heavy)
+                rb.gravityScale = 1f; 
             }
 
             grabbedObject = null;
