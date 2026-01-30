@@ -16,7 +16,7 @@ public class Native : MonoBehaviour
     public float maxWaitTime = 1f;
 
     [Header("Landing Settings")]
-    public float groundYLevel = -3.5f; // The Y level of your island
+    public float groundYLevel = -3.5f;
     public bool isGrabbed = false;
 
     private Collider2D actualCollider;
@@ -24,24 +24,28 @@ public class Native : MonoBehaviour
     private SpriteRenderer sr;
     private Rigidbody2D rb;
     private float currentSpeed;
-    private bool isFalling = false;
 
     void Start()
     {
         sr = GetComponent<SpriteRenderer>();
-        rb = GetComponent<Rigidbody2D>(); // Get the Rigidbody
-
+        rb = GetComponent<Rigidbody2D>();
 
         if (walkingArea != null)
         {
             actualCollider = walkingArea.GetComponent<Collider2D>() ?? walkingArea.GetComponentInChildren<Collider2D>();
+
+            // If starting outside, snap to a valid position immediately
+            if (actualCollider != null && !actualCollider.OverlapPoint(transform.position))
+            {
+                SnapToValidArea();
+            }
+
             if (actualCollider != null) StartCoroutine(MovementRoutine());
         }
     }
 
     void Update()
     {
-        // Check if the native has landed after being released
         if (!isGrabbed && rb != null && rb.gravityScale > 0)
         {
             if (transform.position.y <= groundYLevel)
@@ -53,20 +57,21 @@ public class Native : MonoBehaviour
 
     void Land()
     {
-        rb.gravityScale = 0; // Stop falling
-        rb.linearVelocity = Vector2.zero; // Stop any residual fall speed
-
-        // Snap to the exact ground level so they don't sink
+        rb.gravityScale = 0;
+        rb.linearVelocity = Vector2.zero;
         transform.position = new Vector3(transform.position.x, groundYLevel, transform.position.z);
 
-        Debug.Log("Native has landed and resumed movement.");
+        // Ensure we didn't land in the water/outside polygon
+        if (actualCollider != null && !actualCollider.OverlapPoint(transform.position))
+        {
+            SnapToValidArea();
+        }
     }
 
     IEnumerator MovementRoutine()
     {
         while (true)
         {
-            // If grabbed or currently falling, wait and do nothing
             if (isGrabbed || (rb != null && rb.gravityScale > 0))
             {
                 yield return null;
@@ -76,15 +81,25 @@ public class Native : MonoBehaviour
             SetNewRandomTarget();
             currentSpeed = Random.Range(minSpeed, maxSpeed);
 
-            while (Vector2.Distance(transform.position, targetPosition) > 0.2f)
+            while (Vector2.Distance(transform.position, targetPosition) > 0.1f)
             {
-                // Break if grabbed during movement
                 if (isGrabbed || (rb != null && rb.gravityScale > 0)) break;
 
-                transform.position = Vector2.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
+                Vector3 nextStep = Vector2.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
+
+                // --- STICK TO AREA LOGIC ---
+                // Only move if the next step is still inside the polygon
+                if (actualCollider.OverlapPoint(nextStep))
+                {
+                    transform.position = nextStep;
+                }
+                else
+                {
+                    // If the path tries to leave the area, stop and pick a new target
+                    break;
+                }
 
                 if (sr != null) sr.flipX = targetPosition.x < transform.position.x;
-
                 yield return null;
             }
 
@@ -98,15 +113,25 @@ public class Native : MonoBehaviour
     void SetNewRandomTarget()
     {
         if (actualCollider == null) return;
-        Vector2 potentialPoint = transform.position;
+
+        Vector2 potentialPoint;
         int attempts = 0;
+
         do
         {
             float x = Random.Range(actualCollider.bounds.min.x, actualCollider.bounds.max.x);
             float y = Random.Range(actualCollider.bounds.min.y, actualCollider.bounds.max.y);
             potentialPoint = new Vector2(x, y);
             attempts++;
-        } while (!actualCollider.OverlapPoint(potentialPoint) && attempts < 30);
+        } while (!actualCollider.OverlapPoint(potentialPoint) && attempts < 100);
+
         targetPosition = potentialPoint;
+    }
+
+    void SnapToValidArea()
+    {
+        if (actualCollider == null) return;
+        // Move to the closest point inside the collider bounds
+        transform.position = new Vector3(actualCollider.bounds.center.x, groundYLevel, transform.position.z);
     }
 }
