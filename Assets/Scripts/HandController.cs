@@ -8,32 +8,39 @@ public class HandController : MonoBehaviour
     [Range(0.1f, 5f)] 
     public float grabRadius = 0.5f;
 
-    [Header("Animation Triggers")]
+    [Header("Hand Animation (The Tool)")]
+    [Tooltip("גרור לכאן את הילדים: גוף ומסכה")]
+    public Animator[] handAnimators; 
     public string grabAnimationTrigger = "isGrabbed";
     public string releaseAnimationTrigger = "isReleased";
 
     [Header("Scaling Settings")]
-    [Tooltip("The MAX scale the Object can reach")]
     public float maxObjectScale = 5.0f; 
-    [Tooltip("The MAX scale the Hand can reach when Object is at max")]
     public float maxHandScale = 3.0f; 
-    [Tooltip("How fast the zoom happens")]
     public float scrollSpeed = 0.2f;
 
     [Header("Live State (Read Only)")]
     [Range(0, 1)]
-    public float growthProgress = 0f; // 0 = Original size, 1 = Max size
+    public float growthProgress = 0f; 
 
     private Transform grabbedObject = null;
-    private Animator grabbedAnimator = null;
+    private Animator[] grabbedObjectAnimators = null; 
     private bool isHolding = false;
-    
     private Vector3 originalHandScale;
     private Vector3 originalObjectScale;
+    private Camera mainCam;
 
     void Start()
     {
+        mainCam = Camera.main;
         originalHandScale = transform.localScale;
+        
+        // אם לא גררת ידנית, הסקריפט ימצא את כל האנימטורים שמתחת לאובייקט הזה
+        if (handAnimators == null || handAnimators.Length == 0)
+        {
+            handAnimators = GetComponentsInChildren<Animator>();
+            Debug.Log($"<color=cyan>HandController:</color> Found {handAnimators.Length} animators in children.");
+        }
     }
 
     void Update()
@@ -52,36 +59,15 @@ public class HandController : MonoBehaviour
         }
     }
 
-    void MoveHandWithMouse()
+    private void MoveHandWithMouse()
     {
-        Vector3 mousePos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
+        if (mainCam == null) return;
+        Vector3 mousePos = mainCam.ScreenToWorldPoint(Input.mousePosition);
         mousePos.z = 0; 
         transform.position = mousePos;
     }
 
-    void HandleProportionalScaling()
-    {
-        float scrollInput = Input.GetAxis("Mouse ScrollWheel");
-        if (Mathf.Abs(scrollInput) < 0.001f) return;
-
-        // 1. Update the progress percentage (0 to 1)
-        growthProgress += scrollInput * scrollSpeed;
-        growthProgress = Mathf.Clamp01(growthProgress); // Strictly keep between 0 and 1
-
-        // 2. Calculate Hand Scale based on progress
-        // Formula: StartScale + (Progress * (MaxScale - StartScale))
-        float handTargetMultiplier = 1f + (growthProgress * (maxHandScale - 1f));
-        transform.localScale = originalHandScale * handTargetMultiplier;
-
-        // 3. Calculate Object Scale based on same progress
-        if (grabbedObject != null)
-        {
-            float objectTargetMultiplier = 1f + (growthProgress * (maxObjectScale - 1f));
-            grabbedObject.localScale = originalObjectScale * objectTargetMultiplier;
-        }
-    }
-
-    void TryGrabObject()
+    private void TryGrabObject()
     {
         if (grabPoint == null) return;
 
@@ -90,19 +76,28 @@ public class HandController : MonoBehaviour
         if (hitCollider != null)
         {
             grabbedObject = hitCollider.transform;
+            isHolding = true;
+            growthProgress = 0f; // איפוס הגדילה בתפיסה חדשה
+
+            // 1. עדכון סקריפט ה-Native של האובייקט
             Native nativeScript = grabbedObject.GetComponent<Native>();
             if (nativeScript != null) nativeScript.isGrabbed = true;
-            isHolding = true;
-            growthProgress = 0f; // Start at 0% growth
-            originalObjectScale = grabbedObject.localScale;
 
+            // 2. שמירת הגודל המקורי לפני ההצמדה
+            originalObjectScale = grabbedObject.localScale;
+            
+            // 3. הצמדה פיזית ליד
             grabbedObject.SetParent(grabPoint);
             grabbedObject.localPosition = Vector3.zero; 
 
-            grabbedAnimator = grabbedObject.GetComponent<Animator>();
-            if (grabbedAnimator != null)
-                grabbedAnimator.SetTrigger(grabAnimationTrigger);
+            // 4. הפעלת אנימציות היד (גוף + מסכה)
+            PlayAnimatorsSafely(handAnimators, grabAnimationTrigger);
 
+            // 5. סריקת כל האנימטורים בתוך ה-Prefab שנתפס והפעלתם
+            grabbedObjectAnimators = grabbedObject.GetComponentsInChildren<Animator>();
+            PlayAnimatorsSafely(grabbedObjectAnimators, grabAnimationTrigger);
+
+            // 6. ניטרול פיזיקה כדי שלא יווצרו "קפיצות"
             Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
@@ -112,18 +107,23 @@ public class HandController : MonoBehaviour
         }
     }
 
-    void ReleaseObject()
+    private void ReleaseObject()
     {
         if (grabbedObject != null)
         {
+            // 1. שחרור סקריפט ה-Native
             Native nativeScript = grabbedObject.GetComponent<Native>();
             if (nativeScript != null) nativeScript.isGrabbed = false;
+
+            // 2. ניתוק מהיד והחזרת הגודל המקורי
             grabbedObject.SetParent(null);
             grabbedObject.localScale = originalObjectScale;
 
-            if (grabbedAnimator != null)
-                grabbedAnimator.SetTrigger(releaseAnimationTrigger);
+            // 3. הפעלת אנימציות שחרור ליד ולחפץ
+            PlayAnimatorsSafely(handAnimators, releaseAnimationTrigger);
+            PlayAnimatorsSafely(grabbedObjectAnimators, releaseAnimationTrigger);
 
+            // 4. החזרת פיזיקה דינמית
             Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
@@ -132,13 +132,63 @@ public class HandController : MonoBehaviour
             }
 
             grabbedObject = null;
-            grabbedAnimator = null;
+            grabbedObjectAnimators = null;
         }
 
-        // Reset
+        // 5. איפוס היד למצבה המקורי
         growthProgress = 0f;
         transform.localScale = originalHandScale;
         isHolding = false;
+    }
+
+    private void HandleProportionalScaling()
+    {
+        float scrollInput = Input.GetAxis("Mouse ScrollWheel");
+        
+        // ביצוע שינוי רק אם יש תנועה בגלגלת
+        if (Mathf.Abs(scrollInput) > 0.001f)
+        {
+            growthProgress += scrollInput * scrollSpeed;
+            growthProgress = Mathf.Clamp01(growthProgress);
+
+            // עדכון גודל היד
+            float handFactor = 1f + (growthProgress * (maxHandScale - 1f));
+            transform.localScale = originalHandScale * handFactor;
+
+            // עדכון גודל האובייקט
+            if (grabbedObject != null)
+            {
+                float objectFactor = 1f + (growthProgress * (maxObjectScale - 1f));
+                grabbedObject.localScale = originalObjectScale * objectFactor;
+            }
+        }
+    }
+
+    // פונקציה חכמה שבודקת קיום פרמטרים לפני הפעלה
+    private void PlayAnimatorsSafely(Animator[] anims, string trigger)
+    {
+        if (anims == null || anims.Length == 0) return;
+
+        foreach (Animator a in anims)
+        {
+            if (a != null && a.runtimeAnimatorController != null)
+            {
+                if (HasParameter(trigger, a))
+                {
+                    a.SetTrigger(trigger);
+                }
+            }
+        }
+    }
+
+    // בדיקה טכנית אם הטריגר קיים ב-Controller
+    private bool HasParameter(string paramName, Animator animator)
+    {
+        foreach (AnimatorControllerParameter param in animator.parameters)
+        {
+            if (param.name == paramName) return true;
+        }
+        return false;
     }
 
     private void OnDrawGizmos()
