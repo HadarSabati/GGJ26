@@ -90,6 +90,8 @@ public class HandController : MonoBehaviour
         if (hitCollider != null)
         {
             grabbedObject = hitCollider.transform;
+            Native nativeScript = grabbedObject.GetComponent<Native>();
+            if (nativeScript != null) nativeScript.isGrabbed = true;
             isHolding = true;
             growthProgress = 0f; // Start at 0% growth
             originalObjectScale = grabbedObject.localScale;
@@ -114,6 +116,8 @@ public class HandController : MonoBehaviour
     {
         if (grabbedObject != null)
         {
+            Native nativeScript = grabbedObject.GetComponent<Native>();
+            if (nativeScript != null) nativeScript.isGrabbed = false;
             grabbedObject.SetParent(null);
             grabbedObject.localScale = originalObjectScale;
 

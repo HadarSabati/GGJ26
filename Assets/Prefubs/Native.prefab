@@ -176,9 +176,11 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   maskSprite: {fileID: 0}
-  isCorrect: 0
+  maskType: 
   walkingArea: {fileID: 0}
-  minSpeed: 8
-  maxSpeed: 10
+  minSpeed: 4
+  maxSpeed: 6
   minWaitTime: 0.2
   maxWaitTime: 0.5
+  groundYLevel: -1
+  isGrabbed: 0
