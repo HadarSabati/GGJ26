@@ -281,7 +281,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 4
   m_Sprite: {fileID: 21300000, guid: e878f51b0e8a55946930221d6928148b, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
@@ -678,7 +678,7 @@ SpriteRenderer:
   m_Size: {x: 26.890001, y: 10.805894}
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
-  m_WasSpriteAssigned: 1
+  m_WasSpriteAssigned: 0
   m_MaskInteraction: 0
   m_SpriteSortPoint: 0
 --- !u!4 &444045406 stripped
@@ -880,12 +880,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ad8856315e9e828419d9b3549817481f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  backgroundSprite: {fileID: 1526815575}
   scrollSpeed: 15
   smoothTime: 0.15
   edgeThreshold: 50
-  backgroundWidth: 2500
-  screenWidth: 1920
-  pixelsPerUnit: 100
 --- !u!4 &538279860 stripped
 Transform:
   m_CorrespondingSourceObject: {fileID: 6871847989992550646, guid: 00957991bd585cd49a301b4765e01787, type: 3}
@@ -1310,7 +1308,7 @@ SpriteRenderer:
   m_LightmapParameters: {fileID: 0}
   m_SortingLayerID: 0
   m_SortingLayer: 0
-  m_SortingOrder: 0
+  m_SortingOrder: 4
   m_Sprite: {fileID: 21300000, guid: a5c8c3dbe6e1c2a439380d26cd82286d, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0

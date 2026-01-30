@@ -2,15 +2,10 @@ using UnityEngine;
 
 public class CameraEdgeScroll : MonoBehaviour
 {
-    [Header("Movement Settings")]
+    public SpriteRenderer backgroundSprite; 
     public float scrollSpeed = 15f;
     public float smoothTime = 0.15f;
     public float edgeThreshold = 50f;
-
-    [Header("Boundaries (Pixels)")]
-    public float backgroundWidth = 2500f;
-    public float screenWidth = 1920f;
-    public float pixelsPerUnit = 100f;
 
     private float _targetX;
     private float _currentVelocity;
@@ -19,53 +14,52 @@ public class CameraEdgeScroll : MonoBehaviour
 
     void Start()
     {
-        // Calculate the maximum movement range in Unity Units
-        // Assuming the background starts at X=0
-        float totalMovementRange = (backgroundWidth - screenWidth) / pixelsPerUnit;
+        if (backgroundSprite == null) return;
         
-        _minX = 0f; 
-        _maxX = totalMovementRange;
-
-        // Set initial target to current camera position
+        // נחשב את הגבולות פעם אחת ב-Start
+        UpdateBoundaries();
         _targetX = transform.position.x;
     }
 
-    // LateUpdate is called after all Update functions. 
-    // This prevents jittering when the HandController moves in Update.
-    void LateUpdate() 
+    // יצרתי פונקציה נפרדת כדי שתוכל לקרוא לה אם הרקע זז
+    public void UpdateBoundaries()
     {
+        Camera cam = GetComponent<Camera>();
+        float camHalfWidth = cam.orthographicSize * cam.aspect;
+
+        // bounds.min ו-bounds.max עובדים ב-World Space.
+        // זה לא משנה מי האבא של האובייקט או מה ה-Local Position שלו.
+        float bgLeftEdge = backgroundSprite.bounds.min.x;
+        float bgRightEdge = backgroundSprite.bounds.max.x;
+
+        _minX = bgLeftEdge + camHalfWidth;
+        _maxX = bgRightEdge - camHalfWidth;
+    }
+
+    void LateUpdate()
+    {
+        if (backgroundSprite == null) return;
+
+        // אם האובייקט האבא זז כל הזמן, כדאי לקרוא ל-UpdateBoundaries גם כאן
+        // אבל למען הביצועים, עדיף להשאיר את זה ב-Start אם הרקע סטטי
         HandleInput();
         ApplyMovement();
     }
 
-    /// <summary>
-    /// Checks if the mouse is near the screen edges and updates the target X position.
-    /// </summary>
     void HandleInput()
     {
         float mouseX = Input.mousePosition.x;
 
-        // Move target right
         if (mouseX >= Screen.width - edgeThreshold)
-        {
             _targetX += scrollSpeed * Time.deltaTime;
-        }
-        // Move target left
         else if (mouseX <= edgeThreshold)
-        {
             _targetX -= scrollSpeed * Time.deltaTime;
-        }
 
-        // Clamp the target position so the camera never sees past the background edges
         _targetX = Mathf.Clamp(_targetX, _minX, _maxX);
     }
 
-    /// <summary>
-    /// Smoothly interpolates the camera's position towards the target X.
-    /// </summary>
     void ApplyMovement()
     {
-        // SmoothDamp provides a more natural "weighted" movement than a simple Lerp
         float newX = Mathf.SmoothDamp(transform.position.x, _targetX, ref _currentVelocity, smoothTime);
         transform.position = new Vector3(newX, transform.position.y, transform.position.z);
     }
