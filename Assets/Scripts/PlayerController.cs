@@ -15,7 +15,7 @@ public class PlayerController : MonoBehaviour
         {
             //Camera.main.ScreenToWorldPoint() function to translate the mouse’s position from screen space to a point in the game world
             Vector3 mousePos = Camera.main.ScreenToWorldPoint(Mouse.current.position.value);
-            Debug.Log("Mouse position: " + mousePos);
+            //Debug.Log("Mouse position: " + mousePos);
         }
     }
 }
