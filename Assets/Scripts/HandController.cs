@@ -2,13 +2,39 @@ using UnityEngine;
 
 public class HandController : MonoBehaviour
 {
-    // Assign "Natives" layer in the Inspector
+    [Header("Detection Settings")]
     public LayerMask targetLayer; 
-    // Drag your "GrabPoint" child object here
     public Transform grabPoint; 
+    [Range(0.1f, 5f)] 
+    public float grabRadius = 0.5f;
+
+    [Header("Animation Triggers")]
+    public string grabAnimationTrigger = "isGrabbed";
+    public string releaseAnimationTrigger = "isReleased";
+
+    [Header("Scaling Settings")]
+    [Tooltip("The MAX scale the Object can reach")]
+    public float maxObjectScale = 5.0f; 
+    [Tooltip("The MAX scale the Hand can reach when Object is at max")]
+    public float maxHandScale = 3.0f; 
+    [Tooltip("How fast the zoom happens")]
+    public float scrollSpeed = 0.2f;
+
+    [Header("Live State (Read Only)")]
+    [Range(0, 1)]
+    public float growthProgress = 0f; // 0 = Original size, 1 = Max size
 
     private Transform grabbedObject = null;
+    private Animator grabbedAnimator = null;
     private bool isHolding = false;
+    
+    private Vector3 originalHandScale;
+    private Vector3 originalObjectScale;
+
+    void Start()
+    {
+        originalHandScale = transform.localScale;
+    }
 
     void Update()
     {
@@ -16,16 +42,13 @@ public class HandController : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            if (isHolding)
-                ReleaseObject();
-            else
-                TryGrabObject();
+            if (isHolding) ReleaseObject();
+            else TryGrabObject();
         }
 
-        // Attach the object to the grab point while holding
-        if (isHolding && grabbedObject != null && grabPoint != null)
+        if (isHolding)
         {
-            grabbedObject.position = grabPoint.position;
+            HandleProportionalScaling();
         }
     }
 
@@ -36,18 +59,48 @@ public class HandController : MonoBehaviour
         transform.position = mousePos;
     }
 
+    void HandleProportionalScaling()
+    {
+        float scrollInput = Input.GetAxis("Mouse ScrollWheel");
+        if (Mathf.Abs(scrollInput) < 0.001f) return;
+
+        // 1. Update the progress percentage (0 to 1)
+        growthProgress += scrollInput * scrollSpeed;
+        growthProgress = Mathf.Clamp01(growthProgress); // Strictly keep between 0 and 1
+
+        // 2. Calculate Hand Scale based on progress
+        // Formula: StartScale + (Progress * (MaxScale - StartScale))
+        float handTargetMultiplier = 1f + (growthProgress * (maxHandScale - 1f));
+        transform.localScale = originalHandScale * handTargetMultiplier;
+
+        // 3. Calculate Object Scale based on same progress
+        if (grabbedObject != null)
+        {
+            float objectTargetMultiplier = 1f + (growthProgress * (maxObjectScale - 1f));
+            grabbedObject.localScale = originalObjectScale * objectTargetMultiplier;
+        }
+    }
+
     void TryGrabObject()
     {
-        Vector2 mouseWorldPos = Camera.main.ScreenToWorldPoint(Input.mousePosition);
-        RaycastHit2D hit = Physics2D.Raycast(mouseWorldPos, Vector2.zero, 0f, targetLayer);
+        if (grabPoint == null) return;
 
-        if (hit.collider != null)
+        Collider2D hitCollider = Physics2D.OverlapCircle(grabPoint.position, grabRadius, targetLayer);
+
+        if (hitCollider != null)
         {
-            Debug.Log("<color=cyan>Hand hit:</color> " + hit.collider.name);
-            
-            grabbedObject = hit.transform;
+            grabbedObject = hitCollider.transform;
             isHolding = true;
-            
+            growthProgress = 0f; // Start at 0% growth
+            originalObjectScale = grabbedObject.localScale;
+
+            grabbedObject.SetParent(grabPoint);
+            grabbedObject.localPosition = Vector3.zero; 
+
+            grabbedAnimator = grabbedObject.GetComponent<Animator>();
+            if (grabbedAnimator != null)
+                grabbedAnimator.SetTrigger(grabAnimationTrigger);
+
             Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
@@ -61,20 +114,35 @@ public class HandController : MonoBehaviour
     {
         if (grabbedObject != null)
         {
-            Debug.Log("<color=yellow>Hand released:</color> " + grabbedObject.name);
-            
+            grabbedObject.SetParent(null);
+            grabbedObject.localScale = originalObjectScale;
+
+            if (grabbedAnimator != null)
+                grabbedAnimator.SetTrigger(releaseAnimationTrigger);
+
             Rigidbody2D rb = grabbedObject.GetComponent<Rigidbody2D>();
             if (rb != null)
             {
                 rb.bodyType = RigidbodyType2D.Dynamic;
-                
-                // Change Gravity Scale upon release
-                // Set this value to whatever you need (e.g., 1f for normal, 2f for heavy)
                 rb.gravityScale = 1f; 
             }
 
             grabbedObject = null;
+            grabbedAnimator = null;
         }
+
+        // Reset
+        growthProgress = 0f;
+        transform.localScale = originalHandScale;
         isHolding = false;
+    }
+
+    private void OnDrawGizmos()
+    {
+        if (grabPoint != null)
+        {
+            Gizmos.color = Color.yellow;
+            Gizmos.DrawWireSphere(grabPoint.position, grabRadius);
+        }
     }
 }
