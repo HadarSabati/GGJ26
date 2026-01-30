@@ -5,6 +5,7 @@ public class Native : MonoBehaviour
 {
     [Header("Visuals")]
     public string maskType;
+    public Transform legsPoint;
 
     [Header("The Area Object")]
     public GameObject walkingArea;
@@ -16,36 +17,37 @@ public class Native : MonoBehaviour
     public float maxWaitTime = 1f;
 
     [Header("Landing Settings")]
-    public float groundYLevel = -3.5f;
+    public float groundYLevel = -4f;
     public bool isGrabbed = false;
+    public int fallingSortingOrder = 3;
 
     private Collider2D actualCollider;
     private Vector2 targetPosition;
-    private SpriteRenderer sr;
     private Rigidbody2D rb;
     private float currentSpeed;
+    private SpriteRenderer[] allRenderers;
 
     void Start()
     {
-        sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>();
+        allRenderers = GetComponentsInChildren<SpriteRenderer>();
 
         if (walkingArea != null)
         {
             actualCollider = walkingArea.GetComponent<Collider2D>() ?? walkingArea.GetComponentInChildren<Collider2D>();
-
-            // If starting outside, snap to a valid position immediately
-            if (actualCollider != null && !actualCollider.OverlapPoint(transform.position))
+            if (actualCollider != null)
             {
-                SnapToValidArea();
+                // Give it a moment to initialize then teleport
+                TeleportToRandomValidPoint();
+                StartCoroutine(MovementRoutine());
             }
-
-            if (actualCollider != null) StartCoroutine(MovementRoutine());
         }
     }
 
     void Update()
     {
+        UpdateSortingOrder();
+
         if (!isGrabbed && rb != null && rb.gravityScale > 0)
         {
             if (transform.position.y <= groundYLevel)
@@ -55,16 +57,31 @@ public class Native : MonoBehaviour
         }
     }
 
-    void Land()
+    void UpdateSortingOrder()
     {
-        rb.gravityScale = 0;
-        rb.linearVelocity = Vector2.zero;
-        transform.position = new Vector3(transform.position.x, groundYLevel, transform.position.z);
+        int finalOrder;
 
-        // Ensure we didn't land in the water/outside polygon
-        if (actualCollider != null && !actualCollider.OverlapPoint(transform.position))
+        if (isGrabbed)
         {
-            SnapToValidArea();
+            finalOrder = 10000; 
+        }
+        else if (rb != null && rb.gravityScale > 0)
+        {
+            finalOrder = fallingSortingOrder; 
+        }
+        else if (legsPoint != null)
+        {
+            finalOrder = (int)(legsPoint.position.y * -100);
+        }
+        else
+        {
+            finalOrder = (int)(transform.position.y * -100);
+        }
+
+        foreach (SpriteRenderer s in allRenderers)
+        {
+            s.sortingOrder = finalOrder;
+            if (s.gameObject.name == "mask") s.sortingOrder += 1;
         }
     }
 
@@ -87,51 +104,54 @@ public class Native : MonoBehaviour
 
                 Vector3 nextStep = Vector2.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
 
-                // --- STICK TO AREA LOGIC ---
-                // Only move if the next step is still inside the polygon
+                // Use ONLY your green polygon for pathfinding
                 if (actualCollider.OverlapPoint(nextStep))
                 {
                     transform.position = nextStep;
                 }
                 else
                 {
-                    // If the path tries to leave the area, stop and pick a new target
                     break;
                 }
 
-                if (sr != null) sr.flipX = targetPosition.x < transform.position.x;
+                foreach (var sr in allRenderers) sr.flipX = targetPosition.x < transform.position.x;
                 yield return null;
             }
-
-            if (!isGrabbed && (rb == null || rb.gravityScale == 0))
-            {
-                yield return new WaitForSeconds(Random.Range(minWaitTime, maxWaitTime));
-            }
+            yield return new WaitForSeconds(Random.Range(minWaitTime, maxWaitTime));
         }
     }
 
-    void SetNewRandomTarget()
+    void TeleportToRandomValidPoint()
     {
-        if (actualCollider == null) return;
+        Vector2 safePoint = FindSafePoint();
+        transform.position = new Vector3(safePoint.x, groundYLevel, transform.position.z);
+    }
 
-        Vector2 potentialPoint;
-        int attempts = 0;
+    void SetNewRandomTarget() => targetPosition = FindSafePoint();
 
-        do
+    Vector2 FindSafePoint()
+    {
+        if (actualCollider == null) return transform.position;
+
+        for (int i = 0; i < 500; i++)
         {
             float x = Random.Range(actualCollider.bounds.min.x, actualCollider.bounds.max.x);
             float y = Random.Range(actualCollider.bounds.min.y, actualCollider.bounds.max.y);
-            potentialPoint = new Vector2(x, y);
-            attempts++;
-        } while (!actualCollider.OverlapPoint(potentialPoint) && attempts < 100);
+            Vector2 potentialPoint = new Vector2(x, y);
 
-        targetPosition = potentialPoint;
+            if (actualCollider.OverlapPoint(potentialPoint))
+            {
+                return potentialPoint;
+            }
+        }
+        // Fallback to a corner of the collider bounds if loop fails
+        return new Vector2(actualCollider.bounds.min.x + 0.5f, groundYLevel);
     }
 
-    void SnapToValidArea()
+    void Land()
     {
-        if (actualCollider == null) return;
-        // Move to the closest point inside the collider bounds
-        transform.position = new Vector3(actualCollider.bounds.center.x, groundYLevel, transform.position.z);
+        rb.gravityScale = 0;
+        rb.linearVelocity = Vector2.zero;
+        transform.position = new Vector3(transform.position.x, groundYLevel, transform.position.z);
     }
 }
