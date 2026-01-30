@@ -4,7 +4,6 @@ using System.Collections;
 public class Native : MonoBehaviour
 {
     [Header("Visuals")]
-    public Sprite maskSprite;
     public string maskType;
 
     [Header("The Area Object")]
@@ -32,7 +31,6 @@ public class Native : MonoBehaviour
         sr = GetComponent<SpriteRenderer>();
         rb = GetComponent<Rigidbody2D>(); // Get the Rigidbody
 
-        if (maskSprite != null && sr != null) sr.sprite = maskSprite;
 
         if (walkingArea != null)
         {
