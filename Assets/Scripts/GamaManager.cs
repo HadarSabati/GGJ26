@@ -23,7 +23,7 @@ public class GameManager : MonoBehaviour
     [Header("Lava Logic")]
     public float currentLava = 50f;
     public float lavaRiseSpeed = 10f;
-    public float dampingFactor = 0.5f; // Dramatic slowdown
+    public float dampingFactor = 0.5f;
 
     private float elapsedTime = 0f;
     private float godTimer = 0f;
@@ -36,7 +36,6 @@ public class GameManager : MonoBehaviour
     {
         elapsedTime += Time.deltaTime;
 
-        // Dynamic speed with negative acceleration
         float speedMultiplier = 1f / (1f + (elapsedTime * dampingFactor));
         currentLava += lavaRiseSpeed * speedMultiplier * Time.deltaTime;
         currentLava = Mathf.Clamp(currentLava, 0, 100);
@@ -51,25 +50,30 @@ public class GameManager : MonoBehaviour
         if (godTimer >= timeBetweenGods)
         {
             SwitchGod();
-            godTimer = 0f;
         }
     }
 
-    // Public method to decrease lava from other scripts
     public void DecreaseLava(float amount)
     {
         currentLava -= amount;
         currentLava = Mathf.Clamp(currentLava, 0, 100);
-        Debug.Log("Lava Decreased! Current: " + currentLava);
+        Debug.Log("Sacrifice Successful! Lava Decreased.");
+
+        SwitchGod();
     }
 
-    void SwitchGod()
+    public void SwitchGod()
     {
         if (godsList.Count <= 1) return;
+
         int newIndex;
         do { newIndex = Random.Range(0, godsList.Count); } while (newIndex == lastGodIndex);
+
         lastGodIndex = newIndex;
         activeGod = godsList[newIndex];
+
         if (godDisplay != null) godDisplay.sprite = activeGod.godVisual;
+
+        godTimer = 0f;
     }
 }

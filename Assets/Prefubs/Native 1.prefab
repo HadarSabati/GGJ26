@@ -140,7 +140,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 7.11, y: -0.13, z: 0}
-  m_LocalScale: {x: 0.72, y: 0.72, z: 0.72}
+  m_LocalScale: {x: 0.4, y: 0.4, z: 0.4}
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 2620705358615837158}
@@ -291,13 +291,14 @@ MonoBehaviour:
   maskType: brown
   legsPoint: {fileID: 0}
   walkingArea: {fileID: 0}
-  minSpeed: 4
-  maxSpeed: 6
-  minWaitTime: 0.2
-  maxWaitTime: 0.5
-  groundYLevel: -1
+  minSpeed: 1
+  maxSpeed: 3
+  minWaitTime: 0.6
+  maxWaitTime: 0.8
+  groundYLevel: -4
   isGrabbed: 0
-  fallingSortingOrder: 3
+  fallingSortingOrder: 800
+  spawnPointObject: {fileID: 0}
 --- !u!1 &6074784405255565116
 GameObject:
   m_ObjectHideFlags: 0
@@ -326,7 +327,7 @@ Transform:
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0.1, y: 0.45, z: 0}
-  m_LocalScale: {x: 0.59, y: 0.59, z: 0.59}
+  m_LocalScale: {x: 0.085, y: 0.085, z: 0.085}
   m_ConstrainProportionsScale: 1
   m_Children: []
   m_Father: {fileID: 6871847989992550646}
@@ -375,7 +376,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 4
-  m_Sprite: {fileID: 21300000, guid: 9430a754300050447acf8b58fa38e554, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 749304b43b12d1947825a1eae9ffdaa6, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

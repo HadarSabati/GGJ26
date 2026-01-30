@@ -21,11 +21,15 @@ public class Native : MonoBehaviour
     public bool isGrabbed = false;
     public int fallingSortingOrder = 3;
 
+    [Header("Spawn Settings")]
+    public Transform spawnPointObject;
+
     private Collider2D actualCollider;
     private Vector2 targetPosition;
     private Rigidbody2D rb;
     private float currentSpeed;
     private SpriteRenderer[] allRenderers;
+    private bool isWalking = false;
 
     void Start()
     {
@@ -35,10 +39,18 @@ public class Native : MonoBehaviour
         if (walkingArea != null)
         {
             actualCollider = walkingArea.GetComponent<Collider2D>() ?? walkingArea.GetComponentInChildren<Collider2D>();
+
+            if (spawnPointObject != null)
+            {
+                transform.position = new Vector3(spawnPointObject.position.x, spawnPointObject.position.y, transform.position.z);
+            }
+
             if (actualCollider != null)
             {
-                // Give it a moment to initialize then teleport
-                TeleportToRandomValidPoint();
+                SetNewRandomTarget();
+                currentSpeed = Random.Range(minSpeed, maxSpeed);
+                isWalking = true;
+
                 StartCoroutine(MovementRoutine());
             }
         }
@@ -60,23 +72,10 @@ public class Native : MonoBehaviour
     void UpdateSortingOrder()
     {
         int finalOrder;
-
-        if (isGrabbed)
-        {
-            finalOrder = 10000; 
-        }
-        else if (rb != null && rb.gravityScale > 0)
-        {
-            finalOrder = fallingSortingOrder; 
-        }
-        else if (legsPoint != null)
-        {
-            finalOrder = (int)(legsPoint.position.y * -100);
-        }
-        else
-        {
-            finalOrder = (int)(transform.position.y * -100);
-        }
+        if (isGrabbed) finalOrder = 10000;
+        else if (rb != null && rb.gravityScale > 0) finalOrder = fallingSortingOrder;
+        else if (legsPoint != null) finalOrder = (int)(legsPoint.position.y * -100);
+        else finalOrder = (int)(transform.position.y * -100);
 
         foreach (SpriteRenderer s in allRenderers)
         {
@@ -91,40 +90,40 @@ public class Native : MonoBehaviour
         {
             if (isGrabbed || (rb != null && rb.gravityScale > 0))
             {
+                isWalking = false;
                 yield return null;
                 continue;
             }
 
-            SetNewRandomTarget();
-            currentSpeed = Random.Range(minSpeed, maxSpeed);
+            isWalking = true;
 
-            while (Vector2.Distance(transform.position, targetPosition) > 0.1f)
+            while (Vector2.Distance(transform.position, targetPosition) > 0.15f)
             {
                 if (isGrabbed || (rb != null && rb.gravityScale > 0)) break;
 
                 Vector3 nextStep = Vector2.MoveTowards(transform.position, targetPosition, currentSpeed * Time.deltaTime);
+                Vector2 checkPos = legsPoint != null ? (Vector2)legsPoint.position + (Vector2)(nextStep - transform.position) : (Vector2)nextStep;
 
-                // Use ONLY your green polygon for pathfinding
-                if (actualCollider.OverlapPoint(nextStep))
+                if (actualCollider.OverlapPoint(checkPos))
                 {
                     transform.position = nextStep;
                 }
-                else
-                {
-                    break;
-                }
+                else break;
 
                 foreach (var sr in allRenderers) sr.flipX = targetPosition.x < transform.position.x;
                 yield return null;
             }
-            yield return new WaitForSeconds(Random.Range(minWaitTime, maxWaitTime));
-        }
-    }
 
-    void TeleportToRandomValidPoint()
-    {
-        Vector2 safePoint = FindSafePoint();
-        transform.position = new Vector3(safePoint.x, groundYLevel, transform.position.z);
+            isWalking = false;
+
+            if (!isGrabbed && (rb == null || rb.gravityScale == 0))
+            {
+                yield return new WaitForSeconds(Random.Range(minWaitTime, maxWaitTime));
+
+                SetNewRandomTarget();
+                currentSpeed = Random.Range(minSpeed, maxSpeed);
+            }
+        }
     }
 
     void SetNewRandomTarget() => targetPosition = FindSafePoint();
@@ -132,20 +131,14 @@ public class Native : MonoBehaviour
     Vector2 FindSafePoint()
     {
         if (actualCollider == null) return transform.position;
-
-        for (int i = 0; i < 500; i++)
+        for (int i = 0; i < 200; i++)
         {
             float x = Random.Range(actualCollider.bounds.min.x, actualCollider.bounds.max.x);
             float y = Random.Range(actualCollider.bounds.min.y, actualCollider.bounds.max.y);
             Vector2 potentialPoint = new Vector2(x, y);
-
-            if (actualCollider.OverlapPoint(potentialPoint))
-            {
-                return potentialPoint;
-            }
+            if (actualCollider.OverlapPoint(potentialPoint)) return potentialPoint;
         }
-        // Fallback to a corner of the collider bounds if loop fails
-        return new Vector2(actualCollider.bounds.min.x + 0.5f, groundYLevel);
+        return transform.position;
     }
 
     void Land()
