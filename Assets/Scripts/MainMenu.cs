@@ -9,6 +9,7 @@ public class MainMenu : MonoBehaviour
     [Header("Tutorial Pages")]
     public GameObject page1; 
     public GameObject page2; 
+    public GameObject page3; 
 
     public void StartGame()
     {
@@ -35,11 +36,20 @@ public class MainMenu : MonoBehaviour
     {
         page1.SetActive(true);
         page2.SetActive(false);
+        page3.SetActive(false);
     }
 
     public void ShowPage2()
     {
         page1.SetActive(false);
         page2.SetActive(true);
+        page3.SetActive(false);
+    }
+
+    public void ShowPage3()
+    {
+        page1.SetActive(false);
+        page2.SetActive(false);  
+        page3.SetActive(true);
     }
 }
