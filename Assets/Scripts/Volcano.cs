@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using System.Collections;
 
 public class Volcano : MonoBehaviour
 {
@@ -6,10 +7,12 @@ public class Volcano : MonoBehaviour
     public float lavaSuccessReward = 15f;
     public float lavaFailurePenalty = 5f;
     public Animator smokeAnimator;
-
     public Animator lavaAnimator;
     public GameObject LostPanel;
     public GameObject WinPanel;
+
+    // משתנה קריטי: מונע מהמשחק לנסות להפסיד/לנצח כמה פעמים במקביל
+    private bool isEnding = false;
 
     [Header("Teleport Settings")]
     public Transform[] randomSpawnPoints;
@@ -23,46 +26,77 @@ public class Volcano : MonoBehaviour
     {
         if (WinPanel != null) WinPanel.SetActive(false);
         if (LostPanel != null) LostPanel.SetActive(false);
+        isEnding = false;
+        Time.timeScale = 1f; // ודוא שהזמן רץ בתחילת משחק
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
+        // אם המשחק כבר נגמר (בזמן ההמתנה של ה-5 שניות), אל תעשה כלום
+        if (isEnding) return;
+
         Native native = other.GetComponent<Native>();
 
         if (native != null && !native.isGrabbed && gameManager != null)
         {
             if (splashSource != null) splashSource.Play();
 
+            // בדיקת התאמה
             if (native.maskType == gameManager.activeGod.targetMaskType)
             {
                 if (successSource != null) successSource.Play();
-                smokeAnimator.SetTrigger("ActivateSmoke");
+                if (smokeAnimator != null) smokeAnimator.SetTrigger("ActivateSmoke");
                 gameManager.DecreaseLava(lavaSuccessReward);
-                Debug.Log("Sacrifice Accepted!");
             }
             else
             {
                 if (failureSource != null) failureSource.Play();
-                smokeAnimator.SetTrigger("ActivateSmokeSkull");
+                if (smokeAnimator != null) smokeAnimator.SetTrigger("ActivateSmokeSkull");
                 gameManager.currentLava += lavaFailurePenalty;
-                Debug.Log("Wrong Mask Sacrifice!");
             }
 
-            if (gameManager.currentLava >=60)
+            // בדיקת תנאי סיום
+            if (gameManager.currentLava >= 60)
             {
-                if (lavaAnimator != null) lavaAnimator.SetTrigger("lost");
-                if (LostPanel != null) LostPanel.SetActive(true);
-                Time.timeScale = 0f; 
+                isEnding = true; // נועל את הפונקציה
+                StartCoroutine(HandleGameOver());
             }
-            else if (gameManager.currentLava <=0)
+            else if (gameManager.currentLava <= 0)
             {
+                isEnding = true;
                 if (lavaAnimator != null) lavaAnimator.SetTrigger("win");
                 if (WinPanel != null) WinPanel.SetActive(true);
                 Time.timeScale = 0f;
             }
 
+            // שיגור הנייטיב חזרה למעלה
             TeleportToRandomPoint(other.transform);
         }
+    }
+
+    IEnumerator HandleGameOver()
+    {
+        Debug.Log("Game Ending... Playing Animation");
+
+        // 1. הפעלת האנימציה
+        if (lavaAnimator != null)
+        {
+            lavaAnimator.SetTrigger("lost");
+        }
+
+        // 2. המתנה בזמן אמת (חשוב!)
+        // yield return new WaitForSecondsRealtime(5f); 
+        // אם תשתמשי ב-WaitForSeconds רגיל ומישהו יעצור את הזמן, זה לעולם לא יקרה
+        yield return new WaitForSeconds(5f);
+
+        // 3. הצגת הפאנל
+        if (LostPanel != null)
+        {
+            LostPanel.SetActive(true);
+        }
+
+        // 4. עצירת המשחק
+        Time.timeScale = 0f;
     }
 
     private void TeleportToRandomPoint(Transform targetTransform)
