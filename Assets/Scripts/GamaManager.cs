@@ -7,13 +7,16 @@ public class GameManager : MonoBehaviour
     public struct GodInfo
     {
         public string godName;
-        public Sprite godVisual;
+        public GameObject godPrefab; // שינוי מ-Sprite ל-GameObject (ה-Prefab עם האנימציה)
         public string targetMaskType;
     }
 
     public List<GodInfo> godsList;
     public float timeBetweenGods = 3f;
-    public SpriteRenderer godDisplay;
+
+    [Header("Placement")]
+    public Transform godSpawnPoint; // המקום שבו האנימציה תיווצר (למשל מעל הר הגעש)
+    private GameObject currentGodInstance; // משתנה לשמירת האובייקט הנוכחי כדי שנוכל למחוק אותו
 
     [Header("Lava Mask Control")]
     public Transform lavaMask;
@@ -66,13 +69,25 @@ public class GameManager : MonoBehaviour
     {
         if (godsList.Count <= 1) return;
 
+        // 1. בחירת אל חדש
         int newIndex;
         do { newIndex = Random.Range(0, godsList.Count); } while (newIndex == lastGodIndex);
-
         lastGodIndex = newIndex;
         activeGod = godsList[newIndex];
 
-        if (godDisplay != null) godDisplay.sprite = activeGod.godVisual;
+        // 2. השמדת האנימציה הקודמת אם קיימת
+        if (currentGodInstance != null)
+        {
+            Destroy(currentGodInstance);
+        }
+
+        // 3. יצירת האנימציה החדשה מה-Prefab
+        if (activeGod.godPrefab != null && godSpawnPoint != null)
+        {
+            currentGodInstance = Instantiate(activeGod.godPrefab, godSpawnPoint.position, Quaternion.identity);
+            // הצמדת האנימציה לנקודת הספאון (אופציונלי, עוזר אם המצלמה זזה)
+            currentGodInstance.transform.SetParent(godSpawnPoint);
+        }
 
         godTimer = 0f;
     }
