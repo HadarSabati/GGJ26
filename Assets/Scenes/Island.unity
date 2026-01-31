@@ -1088,7 +1088,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 5.4
+  orthographic size: 5.44
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -3119,9 +3119,9 @@ MonoBehaviour:
   handAnimators: []
   grabAnimationTrigger: isGrabbed
   releaseAnimationTrigger: isReleased
-  maxObjectScale: 0.5
-  maxHandScale: 0.5
-  scrollSpeed: 0.2
+  maxObjectScale: 2.2
+  maxHandScale: 1.2
+  scrollSpeed: 0.4
   growthProgress: 0
 --- !u!4 &1579991564
 Transform:

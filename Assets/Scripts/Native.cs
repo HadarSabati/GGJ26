@@ -110,7 +110,7 @@ public class Native : MonoBehaviour
                 }
                 else break;
 
-                foreach (var sr in allRenderers) sr.flipX = targetPosition.x < transform.position.x;
+                //foreach (var sr in allRenderers) sr.flipX = targetPosition.x < transform.position.x;
                 yield return null;
             }
 
