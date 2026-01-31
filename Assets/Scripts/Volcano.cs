@@ -6,52 +6,64 @@ public class Volcano : MonoBehaviour
     public float lavaSuccessReward = 15f;
     public float lavaFailurePenalty = 5f;
     public Animator smokeAnimator;
-    //public Animator smokeAnimatorSkull;
 
+    [Header("Teleport Settings")]
+    // Drag your two empty GameObjects (spawn points) here in the inspector
+    public Transform[] randomSpawnPoints; 
 
     [Header("Audio Sources")]
-    // This plays every time a native hits the lava
     public AudioSource splashSource; 
-    // This plays only on correct sacrifice
     public AudioSource successSource; 
-    // This plays only on wrong sacrifice
     public AudioSource failureSource; 
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         Native native = other.GetComponent<Native>();
 
-        Debug.Log(native.maskType);
-        Debug.Log(gameManager.activeGod.targetMaskType);
-
-        // Check if the object is a Native and is not being held by the player
         if (native != null && !native.isGrabbed && gameManager != null)
         {
             // 1. Always play the splash sound
             if (splashSource != null) splashSource.Play();
 
-            // 2. Check for mask match
+            // 2. Logic for mask match
             if (native.maskType == gameManager.activeGod.targetMaskType)
             {
-                // Play success sound in addition to splash
                 if (successSource != null) successSource.Play();
-                //smokeAnimator.SetTrigger("ActivateSmoke");
-
                 gameManager.DecreaseLava(lavaSuccessReward);
                 Debug.Log("Sacrifice Accepted!");
             }
             else
             {
-                // Play failure sound in addition to splash
                 if (failureSource != null) failureSource.Play();
-                //smokeAnimator.SetTrigger("ActivateSmokeSkull");
-
                 gameManager.currentLava += lavaFailurePenalty;
                 Debug.Log("Wrong Mask Sacrifice!");
             }
 
-            // Remove the native from the game
-            Destroy(other.gameObject);
+            // 3. Teleport the object instead of destroying it
+            TeleportToRandomPoint(other.transform);
+        }
+    }
+
+    private void TeleportToRandomPoint(Transform targetTransform)
+    {
+        if (randomSpawnPoints != null && randomSpawnPoints.Length > 0)
+        {
+            // Pick a random index (0 or 1 if you provided two points)
+            int randomIndex = Random.Range(0, randomSpawnPoints.Length);
+            
+            // Move the object to the chosen point
+            targetTransform.position = randomSpawnPoints[randomIndex].position;
+
+            // Optional: Reset physics velocity so they don't keep falling/moving
+            Rigidbody2D rb = targetTransform.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                rb.linearVelocity = Vector2.zero;
+            }
+        }
+        else
+        {
+            Debug.LogWarning("No spawn points assigned in the Volcano script!");
         }
     }
 }
