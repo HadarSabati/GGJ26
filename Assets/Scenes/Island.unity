@@ -3136,18 +3136,6 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
-    - target: {fileID: 260331198927346059, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
-      propertyPath: m_Sprite
-      value: 
-      objectReference: {fileID: 0}
-    - target: {fileID: 260331198927346059, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
-      propertyPath: m_WasSpriteAssigned
-      value: 0
-      objectReference: {fileID: 0}
-    - target: {fileID: 351087179432007503, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
-      propertyPath: m_IsActive
-      value: 1
-      objectReference: {fileID: 0}
     - target: {fileID: 1383056247196970941, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
       propertyPath: gameManager
       value: 
@@ -3160,6 +3148,18 @@ PrefabInstance:
       propertyPath: successSource
       value: 
       objectReference: {fileID: 1854516258}
+    - target: {fileID: 7543722428881278014, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 2.13
+      objectReference: {fileID: 0}
+    - target: {fileID: 7543722428881278014, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: -0.07
+      objectReference: {fileID: 0}
+    - target: {fileID: 7543722428881278014, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0.010082407
+      objectReference: {fileID: 0}
     - target: {fileID: 7543722428881278014, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
       propertyPath: m_LocalRotation.w
       value: 1
