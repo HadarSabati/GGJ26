@@ -295,7 +295,7 @@ MonoBehaviour:
   maxSpeed: 3
   minWaitTime: 0.6
   maxWaitTime: 0.8
-  groundYLevel: -4
+  groundYLevel: -3.6
   isGrabbed: 0
   fallingSortingOrder: 800
   spawnPointObject: {fileID: 0}
