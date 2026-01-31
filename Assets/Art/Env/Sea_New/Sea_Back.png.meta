@@ -1,15 +1,15 @@
 fileFormatVersion: 2
-guid: a5c8c3dbe6e1c2a439380d26cd82286d
+guid: 0057fc8dff3acc84384444d3d875e410
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2665268052744033403
-    second: ForeGround_L_0
+      213: -3003141801630034270
+    second: Sea_Back_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -50,7 +50,7 @@ TextureImporter:
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 9
-  spritePivot: {x: 0.010162147, y: 0.4359659}
+  spritePivot: {x: 0.4918215, y: 0.24206254}
   spritePixelsToUnits: 100
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
@@ -139,13 +139,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ForeGround_L_0
+      name: Sea_Back_0
       rect:
         serializedVersion: 2
         x: 0
-        y: 0
-        width: 545
-        height: 765
+        y: 247
+        width: 3662
+        height: 188
       alignment: 0
       pivot: {x: 0.5, y: 0.5}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -154,8 +154,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 58baef4c3d0130bd0800000000000000
-      internalID: -2665268052744033403
+      spriteID: 2a617b75172b256d0800000000000000
+      internalID: -3003141801630034270
       vertices: []
       indices: 
       edges: []
@@ -174,7 +174,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ForeGround_L_0: -2665268052744033403
+      Sea_Back_0: -3003141801630034270
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
