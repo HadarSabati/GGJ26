@@ -5,6 +5,7 @@ public class Volcano : MonoBehaviour
     public GameManager gameManager;
     public float lavaSuccessReward = 15f;
     public float lavaFailurePenalty = 5f;
+    public Animator smokeAnimator;
 
     [Header("Audio Sources")]
     // This plays every time a native hits the lava
@@ -29,7 +30,8 @@ public class Volcano : MonoBehaviour
             {
                 // Play success sound in addition to splash
                 if (successSource != null) successSource.Play();
-                
+                smokeAnimator.SetTrigger("ActivateSmoke");
+
                 gameManager.DecreaseLava(lavaSuccessReward);
                 Debug.Log("Sacrifice Accepted!");
             }
