@@ -6,6 +6,8 @@ public class Volcano : MonoBehaviour
     public float lavaSuccessReward = 15f;
     public float lavaFailurePenalty = 5f;
     public Animator smokeAnimator;
+    //public Animator smokeAnimatorSkull;
+
 
     [Header("Audio Sources")]
     // This plays every time a native hits the lava
@@ -19,6 +21,9 @@ public class Volcano : MonoBehaviour
     {
         Native native = other.GetComponent<Native>();
 
+        Debug.Log(native.maskType);
+        Debug.Log(gameManager.activeGod.targetMaskType);
+
         // Check if the object is a Native and is not being held by the player
         if (native != null && !native.isGrabbed && gameManager != null)
         {
@@ -30,7 +35,7 @@ public class Volcano : MonoBehaviour
             {
                 // Play success sound in addition to splash
                 if (successSource != null) successSource.Play();
-                smokeAnimator.SetTrigger("ActivateSmoke");
+                //smokeAnimator.SetTrigger("ActivateSmoke");
 
                 gameManager.DecreaseLava(lavaSuccessReward);
                 Debug.Log("Sacrifice Accepted!");
@@ -39,7 +44,8 @@ public class Volcano : MonoBehaviour
             {
                 // Play failure sound in addition to splash
                 if (failureSource != null) failureSource.Play();
-                
+                //smokeAnimator.SetTrigger("ActivateSmokeSkull");
+
                 gameManager.currentLava += lavaFailurePenalty;
                 Debug.Log("Wrong Mask Sacrifice!");
             }

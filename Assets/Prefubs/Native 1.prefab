@@ -288,8 +288,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: f42d6150e3fde0d43aa23ec808cd7baf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  maskType: brown
-  legsPoint: {fileID: 0}
+  maskType: a2
+  legsPoint: {fileID: 3686752020654385301}
   walkingArea: {fileID: 0}
   minSpeed: 1
   maxSpeed: 3
@@ -376,7 +376,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 4
-  m_Sprite: {fileID: 21300000, guid: 749304b43b12d1947825a1eae9ffdaa6, type: 3}
+  m_Sprite: {fileID: 21300000, guid: f9f9f782dbd48e547812598dc5ec13b5, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
