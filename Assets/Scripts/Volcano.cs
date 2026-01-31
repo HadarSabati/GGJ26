@@ -29,12 +29,19 @@ public class Volcano : MonoBehaviour
             if (native.maskType == gameManager.activeGod.targetMaskType)
             {
                 if (successSource != null) successSource.Play();
+
+                smokeAnimator.SetTrigger("ActivateSmoke");
+
                 gameManager.DecreaseLava(lavaSuccessReward);
                 Debug.Log("Sacrifice Accepted!");
             }
             else
             {
                 if (failureSource != null) failureSource.Play();
+
+
+                smokeAnimator.SetTrigger("ActivateSmokeSkull");
+
                 gameManager.currentLava += lavaFailurePenalty;
                 Debug.Log("Wrong Mask Sacrifice!");
             }
