@@ -1,15 +1,15 @@
 fileFormatVersion: 2
-guid: a5c8c3dbe6e1c2a439380d26cd82286d
+guid: eb912525d4564084ca3d240a67c4798a
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -2665268052744033403
-    second: ForeGround_L_0
+      213: -6061513458382460674
+    second: manu_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
     mipMapMode: 0
-    enableMipMap: 1
+    enableMipMap: 0
     sRGBTexture: 1
     linearTexture: 0
     fadeOut: 0
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 1
+  spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -96,17 +96,30 @@ TextureImporter:
     ignorePlatformSupport: 0
     androidETC2FallbackOverride: 0
     forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: WebGL
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: ForeGround_L_0
+      name: manu_0
       rect:
         serializedVersion: 2
-        x: 0
-        y: 0
-        width: 545
-        height: 765
+        x: 13
+        y: 10
+        width: 423
+        height: 152
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +128,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: 58baef4c3d0130bd0800000000000000
-      internalID: -2665268052744033403
+      spriteID: ef82dd7ff9d21eba0800000000000000
+      internalID: -6061513458382460674
       vertices: []
       indices: 
       edges: []
@@ -125,7 +138,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 5e97eb03825dee720800000000000000
+    spriteID: 
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +148,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      ForeGround_L_0: -2665268052744033403
+      manu_0: -6061513458382460674
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 
