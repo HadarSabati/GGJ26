@@ -35,7 +35,7 @@ public class Volcano : MonoBehaviour
             {
                 // Play success sound in addition to splash
                 if (successSource != null) successSource.Play();
-                //smokeAnimator.SetTrigger("ActivateSmoke");
+                smokeAnimator.SetTrigger("ActivateSmoke");
 
                 gameManager.DecreaseLava(lavaSuccessReward);
                 Debug.Log("Sacrifice Accepted!");
@@ -44,7 +44,7 @@ public class Volcano : MonoBehaviour
             {
                 // Play failure sound in addition to splash
                 if (failureSource != null) failureSource.Play();
-                //smokeAnimator.SetTrigger("ActivateSmokeSkull");
+                smokeAnimator.SetTrigger("ActivateSmokeSkull");
 
                 gameManager.currentLava += lavaFailurePenalty;
                 Debug.Log("Wrong Mask Sacrifice!");

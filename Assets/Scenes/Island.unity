@@ -970,6 +970,11 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 452571805}
   m_CullTransparentMesh: 1
+--- !u!212 &480523657 stripped
+SpriteRenderer:
+  m_CorrespondingSourceObject: {fileID: 5553299268972665820, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
+  m_PrefabInstance: {fileID: 1403043101}
+  m_PrefabAsset: {fileID: 0}
 --- !u!1001 &481351457
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -3131,6 +3136,18 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 0}
     m_Modifications:
+    - target: {fileID: 260331198927346059, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 0}
+    - target: {fileID: 260331198927346059, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
+      propertyPath: m_WasSpriteAssigned
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 351087179432007503, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
+      propertyPath: m_IsActive
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 1383056247196970941, guid: 7286ac539d3fd844e9a46a6f5975ca31, type: 3}
       propertyPath: gameManager
       value: 
@@ -4340,7 +4357,7 @@ MonoBehaviour:
     godVisual: {fileID: 21300000, guid: 7e0a3b557a026b648a6037edd78fc2bc, type: 3}
     targetMaskType: a4
   timeBetweenGods: 15
-  godDisplay: {fileID: 0}
+  godDisplay: {fileID: 480523657}
   lavaMask: {fileID: 683675282}
   minYPosition: -2.58
   maxYPosition: 2.39
